@@ -1,5 +1,5 @@
 /**
- * vue-intl v0.1.0
+ * vue-intl v0.1.1
  * Released under the MIT License.
  */
 
@@ -7,7 +7,7 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define(factory);
+		define([], factory);
 	else if(typeof exports === 'object')
 		exports["VueIntl"] = factory();
 	else
@@ -82,6 +82,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Vue.filter('date', v.$date);
 	    Vue.filter('number', v.$number);
 	    Vue.filter('currency', v.$currency);
+	    Vue.filter('relativeDate', v.$relativeDate);
 	}
 
 	if (window.Vue) {
@@ -480,7 +481,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 		}
-	}
+	};
 
 /***/ },
 /* 4 */
@@ -814,8 +815,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var formats = this.$locale.NUMBER_FORMATS;
 
 	        // if null or undefined pass it through
-	        return (number == null) ? number : _.formatNumber(number, formats.PATTERNS[0], formats.GROUP_SEP, formats.DECIMAL_SEP,
-	            fractionSize);
+	        return (number == null) ? number : _.formatNumber(number, formats.PATTERNS[0], formats.GROUP_SEP, formats.DECIMAL_SEP, fractionSize);
 	    };
 
 	};
@@ -910,8 +910,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return Math.round(seconds / time_in_seconds[unit]);
 	    }
 
-	    return function (seconds, fmt_options) {
-	        var key, number, obj, options, patterns = this.$locale.TIMESPAN_FORMATS;
+	    function format(seconds, fmt_options, patterns) {
+	        var key, number, obj, options;
 	        if (fmt_options == null) {
 	            fmt_options = {};
 	        }
@@ -929,7 +929,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        number = calculate_time(Math.abs(seconds), options["unit"]);
 	        options["rule"] = _.pluralCat('de', number);
 	        return patterns[options["direction"]][options["unit"]][options["type"]][options["rule"]].replace(/\{[0-9]\}/, number.toString());
-	    };
+	    }
+
+	    return function (date, options) {
+	        date = date instanceof Date ? date : new Date(date);
+	        return format((date - new Date()) / 1000, options, this.$locale.TIMESPAN_FORMATS);
+	    }
 
 	};
 
