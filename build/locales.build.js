@@ -5,7 +5,13 @@ var glob = require('glob');
 var path = require('path');
 var plural = path.join(__dirname, '../src/plural.js');
 var output = path.join(__dirname, '../dist/locales/');
+
+console.log('Start...');
+
 var relative = path.dirname(mod._resolveFilename('./twitter_cldr'))+'/full/';
+
+console.log(relative);
+
 var source = false;
 
 module.paths.forEach(function (path) {
@@ -13,6 +19,8 @@ module.paths.forEach(function (path) {
         source = path+'/angular-i18n/';
     }
 });
+
+console.log(source);
 
 if (!source) {
   console.log('Unable to find source data.');
