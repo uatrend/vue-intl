@@ -1,4 +1,3 @@
-var mod = require('module');
 var fs = require('fs');
 var md5 = require('md5');
 var glob = require('glob');
@@ -6,12 +5,7 @@ var path = require('path');
 var plural = path.join(__dirname, '../src/plural.js');
 var output = path.join(__dirname, '../dist/locales/');
 
-console.log('Start...');
-
-var relative = path.dirname(mod._resolveFilename('./twitter_cldr'))+'/full/';
-
-console.log(relative);
-
+var relative = path.dirname(require.resolve('twitter_cldr'))+'/full/';
 var source = false;
 
 module.paths.forEach(function (path) {
