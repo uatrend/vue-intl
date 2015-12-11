@@ -1,11 +1,23 @@
+var mod = require('module');
 var fs = require('fs');
 var md5 = require('md5');
 var glob = require('glob');
 var path = require('path');
 var plural = path.join(__dirname, '../src/plural.js');
 var output = path.join(__dirname, '../dist/locales/');
-var source = path.join(__dirname, '../node_modules/angular-i18n/');
-var relative = path.join(__dirname, '../node_modules/twitter_cldr/full/');
+var relative = path.dirname(mod._resolveFilename('./twitter_cldr'))+'/full/';
+var source = false;
+
+module.paths.forEach(function (path) {
+    if (fs.existsSync(path+'/angular-i18n')) {
+        source = path+'/angular-i18n/';
+    }
+});
+
+if (!source) {
+  console.log('Unable to find source data.');
+  return;
+}
 
 global.angular = {
 
