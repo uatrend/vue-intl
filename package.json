@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --config build/webpack.build.config.js",
     "locales": "node build/locales.build.js",
-    "install": "npm run locales"
+    "install": "node build/locales.build.js"
   },
   "keywords": [
     "vue",
