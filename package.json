@@ -15,7 +15,7 @@
     "mvvm"
   ],
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "angular-i18n": "^1.4.4",
     "glob": "^5.0.14",
     "json-loader": "^0.5.2",
