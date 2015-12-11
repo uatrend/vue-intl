@@ -5,16 +5,15 @@ var path = require('path');
 var plural = path.join(__dirname, '../src/plural.js');
 var output = path.join(__dirname, '../dist/locales/');
 
-var relative = path.dirname(require.resolve('twitter_cldr'))+'/full/';
+var relative = path.join(path.dirname(require.resolve('twitter_cldr')),'full/');
 var source = false;
 
-module.paths.forEach(function (path) {
-    if (fs.existsSync(path+'/angular-i18n')) {
-        source = path+'/angular-i18n/';
+module.paths.forEach(function (modules) {
+    var p = path.join(modules,'angular-i18n/');
+    if (fs.existsSync(p)) {
+        source = p;
     }
 });
-
-console.log(source);
 
 if (!source) {
   console.log('Unable to find source data.');
