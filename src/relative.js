@@ -75,6 +75,11 @@ module.exports = function (_) {
 
     return function (date, options) {
         date = date instanceof Date ? date : new Date(date);
+
+        if(options && options.max && Math.abs((date - new Date()) / 1000) > options["max"]) {
+            return require('./date')(_)(date);
+        }
+
         return format((date - new Date()) / 1000, options, this.$locale.TIMESPAN_FORMATS);
     }
 
