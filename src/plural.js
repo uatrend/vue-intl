@@ -35,7 +35,7 @@ module.exports = function (_) {
 
     _.pluralCat = function (id, num, precision) {
 
-        var match = id.match(/^\w+/i);
+        var match = id.match(/^[a-z]+/i);
 
         if (match) {
             id = match[0];
