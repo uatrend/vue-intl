@@ -1,6 +1,6 @@
 {
   "name": "vue-intl",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Internationalization plugin for Vue.js",
   "main": "dist/vue-intl.common.js",
   "scripts": {
