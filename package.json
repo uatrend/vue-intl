@@ -2,10 +2,10 @@
   "name": "vue-intl",
   "version": "0.1.2",
   "description": "Internationalization plugin for Vue.js",
-  "main": "src/index.js",
+  "main": "dist/vue-intl.common.js",
   "scripts": {
-    "build": "webpack --config build/webpack.build.config.js",
-    "locales": "node build/locales.build.js",
+    "build": "node build.js",
+    "locales": "node build.locales.js",
     "install": "npm run locales"
   },
   "keywords": [
@@ -15,12 +15,15 @@
     "mvvm"
   ],
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "angular-i18n": "^1.4.8",
-    "glob": "^5.0.14",
-    "json-loader": "^0.5.2",
+    "babel-preset-es2015-rollup": "^1.1.1",
+    "glob": "^7.0.4",
     "md5": "^2.0.0",
+    "rollup": "^0.31.1",
+    "rollup-plugin-babel": "^2.5.1",
+    "rollup-plugin-json": "^2.0.0",
     "twitter_cldr": "^1.5.0",
-    "webpack": "^1.11.0"
+    "uglify-js": "^2.6.2"
   }
 }

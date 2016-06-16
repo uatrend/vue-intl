@@ -2,9 +2,8 @@ var fs = require('fs');
 var md5 = require('md5');
 var glob = require('glob');
 var path = require('path');
-var plural = path.join(__dirname, '../src/plural.js');
-var output = path.join(__dirname, '../dist/locales/');
-
+var plural = path.join(__dirname, 'src/plural.js');
+var output = path.join(__dirname, 'dist/locales/');
 var relative = path.join(path.dirname(require.resolve('twitter_cldr')),'full/');
 var source = false;
 
