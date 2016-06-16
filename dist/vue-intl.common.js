@@ -1,5 +1,5 @@
 /*!
- * vue-intl v0.1.2
+ * vue-intl v0.2.0
  * Released under the MIT License.
  */
 
