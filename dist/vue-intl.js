@@ -1,5 +1,5 @@
 /*!
- * vue-intl v0.2.0
+ * vue-intl v0.2.1
  * Released under the MIT License.
  */
 
@@ -391,7 +391,7 @@
 
   var PLURAL_CACHE = {};
   var PLURAL_CATEGORY = { ZERO: 'zero', ONE: 'one', TWO: 'two', FEW: 'few', MANY: 'many', OTHER: 'other' };
-  var PLURAL_LOCALES = [['en'], ['af', 'az', 'bg', 'chr', 'el', 'es', 'eu', 'gsw', 'haw', 'hu', 'ka', 'kk', 'ky', 'ml', 'mn', 'nb', 'ne', 'no', 'or', 'sq', 'ta', 'te', 'tr', 'uz'], ['am', 'bn', 'fa', 'gu', 'hi', 'kn', 'mr', 'zu'], ['ar'], ['be'], ['br'], ['bs', 'hr', 'sr'], ['cs', 'sk'], ['cy'], ['da'], ['fil', 'tl'], ['fr', 'hy'], ['ga'], ['he', 'iw'], ['id', 'in', 'ja', 'km', 'ko', 'lo', 'ms', 'my', 'th', 'vi', 'zh'], ['is'], ['ln', 'pa'], ['lt'], ['lv'], ['mk'], ['mt'], ['pl'], ['pt'], ['ro'], ['ru', 'uk'], ['si'], ['sl']]; // END LOCALES
+  var PLURAL_LOCALES = [['en'], ['af', 'az', 'bg', 'chr', 'el', 'es', 'eu', 'gsw', 'haw', 'hu', 'ka', 'kk', 'ky', 'ml', 'mn', 'nb', 'ne', 'no', 'or', 'sq', 'ta', 'te', 'tr', 'uz'], ['am', 'bn', 'fa', 'gu', 'hi', 'kn', 'mr', 'zu'], ['ar'], ['be'], ['br'], ['bs', 'hr', 'sr'], ['cs', 'sk'], ['cy'], ['da'], ['fil', 'tl'], ['fr', 'hy'], ['ga'], ['he', 'iw'], ['id', 'in', 'ja', 'km', 'ko', 'lo', 'my', 'th', 'vi', 'zh'], ['is'], ['ln', 'pa'], ['lt'], ['lv'], ['mk'], ['ms'], ['mt'], ['pl'], ['pt'], ['ro'], ['ru', 'uk'], ['si'], ['sl']]; // END LOCALES
   var PLURAL_RULES = [function (n, precision) {
       var i = n | 0;var vf = getVF(n, precision);if (i == 1 && vf.v == 0) {
           return PLURAL_CATEGORY.ONE;
@@ -518,6 +518,8 @@
       var i = n | 0;var vf = getVF(n, precision);if (vf.v == 0 && i % 10 == 1 || vf.f % 10 == 1) {
           return PLURAL_CATEGORY.ONE;
       }return PLURAL_CATEGORY.OTHER;
+  }, function (n) {
+      return PLURAL_CATEGORY.OTHER;
   }, function (n, precision) {
       if (n == 1) {
           return PLURAL_CATEGORY.ONE;
@@ -624,7 +626,7 @@
           return formatDate(date);
       }
 
-      return format((date - new Date()) / 1000, options, this.$locale.TIMESPAN_FORMATS);
+      return format((date - new Date()) / 1000, options, this.$locale.TIMESPAN_FORMATS, this.$locale.id);
   }
 
   function calculate_unit(seconds, unit_options) {
@@ -662,7 +664,7 @@
       return Math.round(seconds / time_in_seconds[unit]);
   }
 
-  function format(seconds, fmt_options, patterns) {
+  function format(seconds, fmt_options, patterns, locale) {
       var key, number, obj, options;
       if (fmt_options == null) {
           fmt_options = {};
@@ -679,18 +681,20 @@
       options["type"] || (options["type"] = default_type);
       options["number"] = calculate_time(Math.abs(seconds), options["unit"]);
       number = calculate_time(Math.abs(seconds), options["unit"]);
-      options["rule"] = plural(this.$locale.id, number);
+      options["rule"] = plural(locale, number);
       return patterns[options["direction"]][options["unit"]][options["type"]][options["rule"]].replace(/\{[0-9]\}/, number.toString());
   }
 
-  var DATETIME_FORMATS = { "AMPMS": ["AM", "PM"], "DAY": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], "ERANAMES": ["Before Christ", "Anno Domini"], "ERAS": ["BC", "AD"], "FIRSTDAYOFWEEK": 6, "MONTH": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"], "SHORTDAY": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], "SHORTMONTH": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "WEEKENDRANGE": [5, 6], "fullDate": "EEEE, MMMM d, y", "longDate": "MMMM d, y", "medium": "MMM d, y h:mm:ss a", "mediumDate": "MMM d, y", "mediumTime": "h:mm:ss a", "short": "M/d/yy h:mm a", "shortDate": "M/d/yy", "shortTime": "h:mm a" };
+  var DATETIME_FORMATS = { "AMPMS": ["AM", "PM"], "DAY": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], "ERANAMES": ["Before Christ", "Anno Domini"], "ERAS": ["BC", "AD"], "FIRSTDAYOFWEEK": 6, "MONTH": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"], "SHORTDAY": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], "SHORTMONTH": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "STANDALONEMONTH": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"], "WEEKENDRANGE": [5, 6], "fullDate": "EEEE, MMMM d, y", "longDate": "MMMM d, y", "medium": "MMM d, y h:mm:ss a", "mediumDate": "MMM d, y", "mediumTime": "h:mm:ss a", "short": "M/d/yy h:mm a", "shortDate": "M/d/yy", "shortTime": "h:mm a" };
   var NUMBER_FORMATS = { "CURRENCY_SYM": "$", "DECIMAL_SEP": ".", "GROUP_SEP": ",", "PATTERNS": [{ "gSize": 3, "lgSize": 3, "maxFrac": 3, "minFrac": 0, "minInt": 1, "negPre": "-", "negSuf": "", "posPre": "", "posSuf": "" }, { "gSize": 3, "lgSize": 3, "maxFrac": 2, "minFrac": 2, "minInt": 1, "negPre": "-¤", "negSuf": "", "posPre": "¤", "posSuf": "" }] };
   var id = "en";
+  var localeID = "en";
   var TIMESPAN_FORMATS = { "ago": { "second": { "default": { "one": "{0} second ago", "other": "{0} seconds ago" } }, "minute": { "default": { "one": "{0} minute ago", "other": "{0} minutes ago" } }, "hour": { "default": { "one": "{0} hour ago", "other": "{0} hours ago" } }, "day": { "default": { "one": "{0} day ago", "other": "{0} days ago" } }, "week": { "default": { "one": "{0} week ago", "other": "{0} weeks ago" } }, "month": { "default": { "one": "{0} month ago", "other": "{0} months ago" } }, "year": { "default": { "one": "{0} year ago", "other": "{0} years ago" } } }, "until": { "second": { "default": { "one": "In {0} second", "other": "In {0} seconds" } }, "minute": { "default": { "one": "In {0} minute", "other": "In {0} minutes" } }, "hour": { "default": { "one": "In {0} hour", "other": "In {0} hours" } }, "day": { "default": { "one": "In {0} day", "other": "In {0} days" } }, "week": { "default": { "one": "In {0} week", "other": "In {0} weeks" } }, "month": { "default": { "one": "In {0} month", "other": "In {0} months" } }, "year": { "default": { "one": "In {0} year", "other": "In {0} years" } } }, "none": { "second": { "default": { "one": "{0} second", "other": "{0} seconds" }, "short": { "one": "{0} sec", "other": "{0} secs" }, "abbreviated": { "one": "{0}s", "other": "{0}s" } }, "minute": { "default": { "one": "{0} minute", "other": "{0} minutes" }, "short": { "one": "{0} min", "other": "{0} mins" }, "abbreviated": { "one": "{0}m", "other": "{0}m" } }, "hour": { "default": { "one": "{0} hour", "other": "{0} hours" }, "short": { "one": "{0} hr", "other": "{0} hrs" }, "abbreviated": { "one": "{0}h", "other": "{0}h" } }, "day": { "default": { "one": "{0} day", "other": "{0} days" }, "short": { "one": "{0} day", "other": "{0} days" }, "abbreviated": { "one": "{0}d", "other": "{0}d" } }, "week": { "default": { "one": "{0} week", "other": "{0} weeks" }, "short": { "one": "{0} wk", "other": "{0} wks" } }, "month": { "default": { "one": "{0} month", "other": "{0} months" }, "short": { "one": "{0} mth", "other": "{0} mths" } }, "year": { "default": { "one": "{0} year", "other": "{0} years" }, "short": { "one": "{0} yr", "other": "{0} yrs" } } } };
   var defaultLocale = {
   	DATETIME_FORMATS: DATETIME_FORMATS,
   	NUMBER_FORMATS: NUMBER_FORMATS,
   	id: id,
+  	localeID: localeID,
   	TIMESPAN_FORMATS: TIMESPAN_FORMATS
   };
 
