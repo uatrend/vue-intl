@@ -26,7 +26,7 @@ export default function (date, options) {
         return formatDate(date);
     }
 
-    return format((date - new Date()) / 1000, options, this.$locale.TIMESPAN_FORMATS);
+    return format((date - new Date()) / 1000, options, this.$locale.TIMESPAN_FORMATS, this.$locale.id);
 }
 
 function calculate_unit(seconds, unit_options) {
@@ -64,7 +64,7 @@ function calculate_time(seconds, unit) {
     return Math.round(seconds / time_in_seconds[unit]);
 }
 
-function format(seconds, fmt_options, patterns) {
+function format(seconds, fmt_options, patterns, locale) {
     var key, number, obj, options;
     if (fmt_options == null) {
         fmt_options = {};
@@ -81,6 +81,6 @@ function format(seconds, fmt_options, patterns) {
     options["type"] || (options["type"] = default_type);
     options["number"] = calculate_time(Math.abs(seconds), options["unit"]);
     number = calculate_time(Math.abs(seconds), options["unit"]);
-    options["rule"] = plural(this.$locale.id, number);
+    options["rule"] = plural(locale, number);
     return patterns[options["direction"]][options["unit"]][options["type"]][options["rule"]].replace(/\{[0-9]\}/, number.toString());
 }
