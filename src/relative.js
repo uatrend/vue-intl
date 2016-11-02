@@ -26,7 +26,7 @@ export default function (date, options) {
         return formatDate(date);
     }
 
-    return format((date - new Date()) / 1000, options, this.$locale.TIMESPAN_FORMATS, this.$locale.id);
+    return format((date - new Date()) / 1000, options, this.$locale.TIMESPAN_FORMATS, this.$locale.TIMESPAN_FORMATS.localeID || this.$locale.id);
 }
 
 function calculate_unit(seconds, unit_options) {

@@ -54,11 +54,13 @@ global.angular = {
             var path = relative+locale+'.js';
             if (!file && fs.existsSync(path)) {
                 file = path;
+                id = locale;
             }
         });
 
         if (file) {
             value.TIMESPAN_FORMATS = (new (require(file)).TimespanFormatter).patterns;
+            value.TIMESPAN_FORMATS.localeID = id;
         }
 
         file = output + value.id + '.json';
