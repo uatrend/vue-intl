@@ -5,8 +5,7 @@
   "main": "dist/vue-intl.common.js",
   "scripts": {
     "build": "node build.js",
-    "locales": "node build.locales.js",
-    "install": "npm run locales"
+    "locales": "node build.locales.js"
   },
   "keywords": [
     "vue",
