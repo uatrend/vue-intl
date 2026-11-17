@@ -24,7 +24,7 @@ const read = async function (file, cb) {
 
 const logFile = async function (file) {
     const data = await read(file);
-    console.log(`${cyan(file)} ${getSize(data)}`);
+    console.log(`${blue(file)} ${getSize(data)}`);
 };
 
 const writeFile = promisify(fs.writeFile);
@@ -51,7 +51,10 @@ run().catch(({message}) => {
 async function run() {
     const files = [{
         name: 'vue-intl',
-        configs: [{ format: 'umd', banner, name: 'VueIntl', sourcemap: false  }, { format: 'cjs', banner }],
+        configs: [
+            { format: 'umd', banner, name: 'VueIntl', sourcemap: false  },
+            { format: 'cjs', banner, exports: 'default' }
+        ],
         minify: true
     }];
 
@@ -80,8 +83,8 @@ async function compile (file, dest, {name, configs, minify = true}) {
     });
 }
 
-function cyan(str) {
-    return `\x1b[1m\x1b[36m${str}\x1b[39m\x1b[22m`;
+function blue(str) {
+    return '\x1b[1m\x1b[34m' + str + '\x1b[39m\x1b[22m';
 }
 
 function getSize(data) {

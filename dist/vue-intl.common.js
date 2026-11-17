@@ -1,31 +1,16 @@
 /*!
- * vue-intl v0.2.3
+ * vue-intl v0.3.1
  * Released under the MIT License.
  */
 
 'use strict';
 
-function _typeof(obj) {
-  "@babel/helpers - typeof";
-
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    _typeof = function (obj) {
-      return typeof obj;
-    };
-  } else {
-    _typeof = function (obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-  }
-
-  return _typeof(obj);
-}
-
 /**
  * Utility functions.
  */
+
 var arr = Array.prototype,
-    obj = Object.prototype;
+  obj = Object.prototype;
 function isString(val) {
   return typeof val === 'string';
 }
@@ -33,7 +18,7 @@ function isNumber(val) {
   return typeof val === 'number';
 }
 function isObject(obj) {
-  return obj !== null && _typeof(obj) === 'object';
+  return obj !== null && typeof obj === 'object';
 }
 function isUndefined(val) {
   return typeof val === 'undefined';
@@ -55,10 +40,11 @@ function uppercase(str) {
  * Date and time formatting.
  * Based on: https://docs.angularjs.org/api/ng/filter/date
  */
-var NUMBER_STRING = /^\-?\d+$/;
-var R_ISO8601_STR = /^(\d{4})-?(\d\d)-?(\d\d)(?:T(\d\d)(?::?(\d\d)(?::?(\d\d)(?:\.(\d+))?)?)?(Z|([+-])(\d\d):?(\d\d))?)?$/;
-var DATE_FORMATS_SPLIT = /((?:[^yMdHhmsaZEwG']+)|(?:'(?:[^']|'')*')|(?:E+|y+|M+|d+|H+|h+|m+|s+|a|Z|G+|w+))(.*)/;
-var DATE_FORMATS = {
+
+const NUMBER_STRING = /^\-?\d+$/;
+const R_ISO8601_STR = /^(\d{4})-?(\d\d)-?(\d\d)(?:T(\d\d)(?::?(\d\d)(?::?(\d\d)(?:\.(\d+))?)?)?(Z|([+-])(\d\d):?(\d\d))?)?$/;
+const DATE_FORMATS_SPLIT = /((?:[^yMdHhmsaZEwG']+)|(?:'(?:[^']|'')*')|(?:E+|y+|M+|d+|H+|h+|m+|s+|a|Z|G+|w+))(.*)/;
+const DATE_FORMATS = {
   yyyy: dateGetter('FullYear', 4),
   yy: dateGetter('FullYear', 2, 0, true),
   y: dateGetter('FullYear', 1),
@@ -90,28 +76,23 @@ var DATE_FORMATS = {
 };
 function formatDate (date, format, timezone) {
   var text = '',
-      parts = [],
-      formats = this.$locale.DATETIME_FORMATS,
-      fn,
-      match;
+    parts = [],
+    formats = this.$locale.DATETIME_FORMATS,
+    fn,
+    match;
   format = format || 'mediumDate';
   format = formats[format] || format;
-
   if (isString(date)) {
     date = NUMBER_STRING.test(date) ? toInt(date) : jsonStringToDate(date);
   }
-
   if (isNumber(date)) {
     date = new Date(date);
   }
-
   if (!isDate(date) || !isFinite(date.getTime())) {
     return date;
   }
-
   while (format) {
     match = DATE_FORMATS_SPLIT.exec(format);
-
     if (match) {
       parts = concat(parts, match, 1);
       format = parts.pop();
@@ -120,56 +101,41 @@ function formatDate (date, format, timezone) {
       format = null;
     }
   }
-
   var dateTimezoneOffset = date.getTimezoneOffset();
-
   if (timezone) {
     dateTimezoneOffset = timezoneToOffset(timezone, date.getTimezoneOffset());
     date = convertTimezoneToLocal(date, timezone, true);
   }
-
   parts.forEach(function (value) {
     fn = DATE_FORMATS[value];
     text += fn ? fn(date, formats, dateTimezoneOffset) : value.replace(/(^'|'$)/g, '').replace(/''/g, "'");
   });
   return text;
 }
-
 function padNumber(num, digits, trim) {
   var neg = '';
-
   if (num < 0) {
     neg = '-';
     num = -num;
   }
-
   num = '' + num;
-
-  while (num.length < digits) {
-    num = '0' + num;
-  }
-
+  while (num.length < digits) num = '0' + num;
   if (trim) {
     num = num.substr(num.length - digits);
   }
-
   return neg + num;
 }
-
 function dateGetter(name, size, offset, trim) {
   offset = offset || 0;
   return function (date) {
     var value = date['get' + name]();
-
     if (offset > 0 || value > -offset) {
       value += offset;
     }
-
     if (value === 0 && offset == -12) value = 12;
     return padNumber(value, size, trim);
   };
 }
-
 function dateStrGetter(name, shortForm) {
   return function (date, formats) {
     var value = date['get' + name]();
@@ -177,65 +143,55 @@ function dateStrGetter(name, shortForm) {
     return formats[get][value];
   };
 }
-
 function timeZoneGetter(date, formats, offset) {
   var zone = -1 * offset;
   var paddedZone = zone >= 0 ? "+" : "";
   paddedZone += padNumber(Math[zone > 0 ? 'floor' : 'ceil'](zone / 60), 2) + padNumber(Math.abs(zone % 60), 2);
   return paddedZone;
 }
-
 function getFirstThursdayOfYear(year) {
   // 0 = index of January
-  var dayOfWeekOnFirst = new Date(year, 0, 1).getDay(); // 4 = index of Thursday (+1 to account for 1st = 5)
+  var dayOfWeekOnFirst = new Date(year, 0, 1).getDay();
+  // 4 = index of Thursday (+1 to account for 1st = 5)
   // 11 = index of *next* Thursday (+1 account for 1st = 12)
-
   return new Date(year, 0, (dayOfWeekOnFirst <= 4 ? 5 : 12) - dayOfWeekOnFirst);
 }
-
 function getThursdayThisWeek(datetime) {
-  return new Date(datetime.getFullYear(), datetime.getMonth(), // 4 = index of Thursday
+  return new Date(datetime.getFullYear(), datetime.getMonth(),
+  // 4 = index of Thursday
   datetime.getDate() + (4 - datetime.getDay()));
 }
-
 function weekGetter(size) {
   return function (date) {
     var firstThurs = getFirstThursdayOfYear(date.getFullYear()),
-        thisThurs = getThursdayThisWeek(date);
+      thisThurs = getThursdayThisWeek(date);
     var diff = +thisThurs - +firstThurs,
-        result = 1 + Math.round(diff / 6.048e8); // 6.048e8 ms per week
+      result = 1 + Math.round(diff / 6.048e8); // 6.048e8 ms per week
 
     return padNumber(result, size);
   };
 }
-
 function ampmGetter(date, formats) {
   return date.getHours() < 12 ? formats.AMPMS[0] : formats.AMPMS[1];
 }
-
 function eraGetter(date, formats) {
   return date.getFullYear() <= 0 ? formats.ERAS[0] : formats.ERAS[1];
 }
-
 function longEraGetter(date, formats) {
   return date.getFullYear() <= 0 ? formats.ERANAMES[0] : formats.ERANAMES[1];
 }
-
 function jsonStringToDate(string) {
   var match;
-
   if (match = string.match(R_ISO8601_STR)) {
     var date = new Date(0),
-        tzHour = 0,
-        tzMin = 0,
-        dateSetter = match[8] ? date.setUTCFullYear : date.setFullYear,
-        timeSetter = match[8] ? date.setUTCHours : date.setHours;
-
+      tzHour = 0,
+      tzMin = 0,
+      dateSetter = match[8] ? date.setUTCFullYear : date.setFullYear,
+      timeSetter = match[8] ? date.setUTCHours : date.setHours;
     if (match[9]) {
       tzHour = toInt(match[9] + match[10]);
       tzMin = toInt(match[9] + match[11]);
     }
-
     dateSetter.call(date, toInt(match[1]), toInt(match[2]) - 1, toInt(match[3]));
     var h = toInt(match[4] || 0) - tzHour;
     var m = toInt(match[5] || 0) - tzMin;
@@ -244,21 +200,17 @@ function jsonStringToDate(string) {
     timeSetter.call(date, h, m, s, ms);
     return date;
   }
-
   return string;
 }
-
 function timezoneToOffset(timezone, fallback) {
   var requestedTimezoneOffset = Date.parse('Jan 01, 1970 00:00:00 ' + timezone) / 60000;
   return isNaN(requestedTimezoneOffset) ? fallback : requestedTimezoneOffset;
 }
-
 function addDateMinutes(date, minutes) {
   date = new Date(date.getTime());
   date.setMinutes(date.getMinutes() + minutes);
   return date;
 }
-
 function convertTimezoneToLocal(date, timezone, reverse) {
   reverse = reverse ? -1 : 1;
   var timezoneOffset = timezoneToOffset(timezone, date.getTimezoneOffset());
@@ -269,33 +221,31 @@ function convertTimezoneToLocal(date, timezone, reverse) {
  * Number formatting.
  * Based on: https://docs.angularjs.org/api/ng/filter/number
  */
-var DECIMAL_SEP = '.';
-function formatNumber (number, fractionSize) {
-  var formats = this.$locale.NUMBER_FORMATS; // if null or undefined pass it through
 
+const DECIMAL_SEP = '.';
+function formatNumber (number, fractionSize) {
+  var formats = this.$locale.NUMBER_FORMATS;
+
+  // if null or undefined pass it through
   return number == null ? number : formatNumber$1(number, formats.PATTERNS[0], formats.GROUP_SEP, formats.DECIMAL_SEP, fractionSize);
 }
 function formatNumber$1(number, pattern, groupSep, decimalSep, fractionSize) {
   if (isObject(number)) {
     return '';
   }
-
   var isNegative = number < 0;
   number = Math.abs(number);
   var isInfinity = number === Infinity;
   if (!isInfinity && !isFinite(number)) return '';
   var numStr = number + '',
-      formatedText = '',
-      hasExponent = false,
-      parts = [];
-
+    formatedText = '',
+    hasExponent = false,
+    parts = [];
   if (isInfinity) {
-    formatedText = "\u221E";
+    formatedText = '\u221e';
   }
-
   if (!isInfinity && numStr.indexOf('e') !== -1) {
     var match = numStr.match(/([\d\.]+)e(-?)(\d+)/);
-
     if (match && match[2] == '-' && match[3] > fractionSize + 1) {
       number = 0;
     } else {
@@ -303,50 +253,44 @@ function formatNumber$1(number, pattern, groupSep, decimalSep, fractionSize) {
       hasExponent = true;
     }
   }
-
   if (!isInfinity && !hasExponent) {
-    var fractionLen = (numStr.split(DECIMAL_SEP)[1] || '').length; // determine fractionSize if it is not specified
+    var fractionLen = (numStr.split(DECIMAL_SEP)[1] || '').length;
 
+    // determine fractionSize if it is not specified
     if (isUndefined(fractionSize)) {
       fractionSize = Math.min(Math.max(pattern.minFrac, fractionLen), pattern.maxFrac);
-    } // safely round numbers in JS without hitting imprecisions of floating-point arithmetics
+    }
+
+    // safely round numbers in JS without hitting imprecisions of floating-point arithmetics
     // inspired by: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
-
-
     number = +(Math.round(+(number.toString() + 'e' + fractionSize)).toString() + 'e' + -fractionSize);
     var fraction = ('' + number).split(DECIMAL_SEP);
     var whole = fraction[0];
     fraction = fraction[1] || '';
     var i,
-        pos = 0,
-        lgroup = pattern.lgSize,
-        group = pattern.gSize;
-
+      pos = 0,
+      lgroup = pattern.lgSize,
+      group = pattern.gSize;
     if (whole.length >= lgroup + group) {
       pos = whole.length - lgroup;
-
       for (i = 0; i < pos; i++) {
         if ((pos - i) % group === 0 && i !== 0) {
           formatedText += groupSep;
         }
-
         formatedText += whole.charAt(i);
       }
     }
-
     for (i = pos; i < whole.length; i++) {
       if ((whole.length - i) % lgroup === 0 && i !== 0) {
         formatedText += groupSep;
       }
-
       formatedText += whole.charAt(i);
-    } // format fraction part.
+    }
 
-
+    // format fraction part.
     while (fraction.length < fractionSize) {
       fraction += '0';
     }
-
     if (fractionSize && fractionSize !== '0') {
       formatedText += decimalSep + fraction.substr(0, fractionSize);
     }
@@ -356,11 +300,9 @@ function formatNumber$1(number, pattern, groupSep, decimalSep, fractionSize) {
       number = parseFloat(formatedText);
     }
   }
-
   if (number === 0) {
     isNegative = false;
   }
-
   parts.push(isNegative ? pattern.negPre : pattern.posPre, formatedText, isNegative ? pattern.negSuf : pattern.posSuf);
   return parts.join('');
 }
@@ -369,24 +311,24 @@ function formatNumber$1(number, pattern, groupSep, decimalSep, fractionSize) {
  * Currency formatting.
  * Based on: https://docs.angularjs.org/api/ng/filter/currency
  */
+
 function formatCurrency (amount, currencySymbol, fractionSize) {
   var formats = this.$locale.NUMBER_FORMATS;
-
   if (isUndefined(currencySymbol)) {
     currencySymbol = formats.CURRENCY_SYM;
   }
-
   if (isUndefined(fractionSize)) {
     fractionSize = formats.PATTERNS[1].maxFrac;
-  } // if null or undefined pass it through
+  }
 
-
+  // if null or undefined pass it through
   return amount == null ? amount : formatNumber$1(amount, formats.PATTERNS[1], formats.GROUP_SEP, formats.DECIMAL_SEP, fractionSize).replace(/\u00A4/g, currencySymbol);
 }
 
 /**
  * Pluralization rules.
  */
+
 var PLURAL_CACHE = {};
 var PLURAL_CATEGORY = {
   ZERO: 'zero',
@@ -396,348 +338,270 @@ var PLURAL_CATEGORY = {
   MANY: 'many',
   OTHER: 'other'
 };
-var PLURAL_LOCALES = [['en'], ['af', 'az', 'bg', 'chr', 'el', 'es', 'eu', 'gsw', 'haw', 'hu', 'ka', 'kk', 'ky', 'ml', 'mn', 'nb', 'ne', 'no', 'or', 'sq', 'ta', 'te', 'tr', 'uz'], ['am', 'bn', 'fa', 'gu', 'hi', 'kn', 'mr', 'zu'], ['ar'], ['be'], ['br'], ['bs', 'hr', 'sh', 'sr'], ['cs', 'sk'], ['cy'], ['da'], ['fil', 'tl'], ['fr', 'hy'], ['ga'], ['he', 'iw'], ['id', 'in', 'ja', 'km', 'ko', 'lo', 'ms', 'my', 'th', 'vi', 'zh'], ['is'], ['ln', 'pa'], ['lt'], ['lv'], ['mk'], ['mo', 'ro'], ['mt'], ['pl'], ['pt'], ['ru', 'uk'], ['si'], ['sl']]; // END LOCALES
-
+var PLURAL_LOCALES = [['zu', 'mr', 'kn', 'hi', 'gu', 'fa', 'bn', 'am'], ['zh', 'vi', 'th', 'my', 'ms', 'lo', 'ko', 'km', 'ja', 'in', 'id'], ['en'], ['uz', 'tr', 'te', 'ta', 'sq', 'or', 'no', 'ne', 'nb', 'mn', 'ml', 'ky', 'kk', 'ka', 'hu', 'haw', 'gsw', 'eu', 'es', 'el', 'chr', 'bg', 'az', 'af'], ['uk', 'ru'], ['tl', 'fil'], ['sr', 'sh', 'hr', 'bs'], ['sl'], ['sk', 'cs'], ['si'], ['ro', 'mo'], ['pt'], ['pl'], ['pa', 'ln'], ['mt'], ['mk'], ['lv'], ['lt'], ['iw', 'he'], ['is'], ['hy', 'fr'], ['ga'], ['da'], ['cy'], ['br'], ['be'], ['ar']]; // END LOCALES
 var PLURAL_RULES = [function (n, precision) {
   var i = n | 0;
-  var vf = getVF(n, precision);
-
-  if (i == 1 && vf.v == 0) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  if (n == 1) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  var i = n | 0;
-
   if (i == 0 || n == 1) {
     return PLURAL_CATEGORY.ONE;
   }
-
   return PLURAL_CATEGORY.OTHER;
 }, function (n, precision) {
-  if (n == 0) {
-    return PLURAL_CATEGORY.ZERO;
-  }
-
-  if (n == 1) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  if (n == 2) {
-    return PLURAL_CATEGORY.TWO;
-  }
-
-  if (n % 100 >= 3 && n % 100 <= 10) {
-    return PLURAL_CATEGORY.FEW;
-  }
-
-  if (n % 100 >= 11 && n % 100 <= 99) {
-    return PLURAL_CATEGORY.MANY;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  if (n % 10 == 1 && n % 100 != 11) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) {
-    return PLURAL_CATEGORY.FEW;
-  }
-
-  if (n % 10 == 0 || n % 10 >= 5 && n % 10 <= 9 || n % 100 >= 11 && n % 100 <= 14) {
-    return PLURAL_CATEGORY.MANY;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  if (n % 10 == 1 && n % 100 != 11 && n % 100 != 71 && n % 100 != 91) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  if (n % 10 == 2 && n % 100 != 12 && n % 100 != 72 && n % 100 != 92) {
-    return PLURAL_CATEGORY.TWO;
-  }
-
-  if ((n % 10 >= 3 && n % 10 <= 4 || n % 10 == 9) && (n % 100 < 10 || n % 100 > 19) && (n % 100 < 70 || n % 100 > 79) && (n % 100 < 90 || n % 100 > 99)) {
-    return PLURAL_CATEGORY.FEW;
-  }
-
-  if (n != 0 && n % 1000000 == 0) {
-    return PLURAL_CATEGORY.MANY;
-  }
-
   return PLURAL_CATEGORY.OTHER;
 }, function (n, precision) {
   var i = n | 0;
   var vf = getVF(n, precision);
-
-  if (vf.v == 0 && i % 10 == 1 && i % 100 != 11 || vf.f % 10 == 1 && vf.f % 100 != 11) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  if (vf.v == 0 && i % 10 >= 2 && i % 10 <= 4 && (i % 100 < 12 || i % 100 > 14) || vf.f % 10 >= 2 && vf.f % 10 <= 4 && (vf.f % 100 < 12 || vf.f % 100 > 14)) {
-    return PLURAL_CATEGORY.FEW;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  var i = n | 0;
-  var vf = getVF(n, precision);
-
   if (i == 1 && vf.v == 0) {
     return PLURAL_CATEGORY.ONE;
   }
-
-  if (i >= 2 && i <= 4 && vf.v == 0) {
-    return PLURAL_CATEGORY.FEW;
-  }
-
-  if (vf.v != 0) {
-    return PLURAL_CATEGORY.MANY;
-  }
-
   return PLURAL_CATEGORY.OTHER;
 }, function (n, precision) {
-  if (n == 0) {
-    return PLURAL_CATEGORY.ZERO;
-  }
-
   if (n == 1) {
     return PLURAL_CATEGORY.ONE;
   }
-
-  if (n == 2) {
-    return PLURAL_CATEGORY.TWO;
-  }
-
-  if (n == 3) {
-    return PLURAL_CATEGORY.FEW;
-  }
-
-  if (n == 6) {
-    return PLURAL_CATEGORY.MANY;
-  }
-
   return PLURAL_CATEGORY.OTHER;
 }, function (n, precision) {
   var i = n | 0;
   var vf = getVF(n, precision);
-  var wt = getWT(vf.v, vf.f);
-
-  if (n == 1 || wt.t != 0 && (i == 0 || i == 1)) {
+  if (vf.v == 0 && i % 10 == 1 && i % 100 != 11) {
     return PLURAL_CATEGORY.ONE;
   }
-
+  if (vf.v == 0 && i % 10 >= 2 && i % 10 <= 4 && (i % 100 < 12 || i % 100 > 14)) {
+    return PLURAL_CATEGORY.FEW;
+  }
+  if (vf.v == 0 && i % 10 == 0 || vf.v == 0 && i % 10 >= 5 && i % 10 <= 9 || vf.v == 0 && i % 100 >= 11 && i % 100 <= 14) {
+    return PLURAL_CATEGORY.MANY;
+  }
   return PLURAL_CATEGORY.OTHER;
 }, function (n, precision) {
   var i = n | 0;
   var vf = getVF(n, precision);
-
   if (vf.v == 0 && (i == 1 || i == 2 || i == 3) || vf.v == 0 && i % 10 != 4 && i % 10 != 6 && i % 10 != 9 || vf.v != 0 && vf.f % 10 != 4 && vf.f % 10 != 6 && vf.f % 10 != 9) {
     return PLURAL_CATEGORY.ONE;
   }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  var i = n | 0;
-
-  if (i == 0 || i == 1) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  if (n == 1) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  if (n == 2) {
-    return PLURAL_CATEGORY.TWO;
-  }
-
-  if (n >= 3 && n <= 6) {
-    return PLURAL_CATEGORY.FEW;
-  }
-
-  if (n >= 7 && n <= 10) {
-    return PLURAL_CATEGORY.MANY;
-  }
-
   return PLURAL_CATEGORY.OTHER;
 }, function (n, precision) {
   var i = n | 0;
   var vf = getVF(n, precision);
-
+  if (vf.v == 0 && i % 10 == 1 && i % 100 != 11 || vf.f % 10 == 1 && vf.f % 100 != 11) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  if (vf.v == 0 && i % 10 >= 2 && i % 10 <= 4 && (i % 100 < 12 || i % 100 > 14) || vf.f % 10 >= 2 && vf.f % 10 <= 4 && (vf.f % 100 < 12 || vf.f % 100 > 14)) {
+    return PLURAL_CATEGORY.FEW;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  var i = n | 0;
+  var vf = getVF(n, precision);
+  if (vf.v == 0 && i % 100 == 1) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  if (vf.v == 0 && i % 100 == 2) {
+    return PLURAL_CATEGORY.TWO;
+  }
+  if (vf.v == 0 && i % 100 >= 3 && i % 100 <= 4 || vf.v != 0) {
+    return PLURAL_CATEGORY.FEW;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  var i = n | 0;
+  var vf = getVF(n, precision);
   if (i == 1 && vf.v == 0) {
     return PLURAL_CATEGORY.ONE;
   }
-
-  if (i == 2 && vf.v == 0) {
-    return PLURAL_CATEGORY.TWO;
+  if (i >= 2 && i <= 4 && vf.v == 0) {
+    return PLURAL_CATEGORY.FEW;
   }
-
-  if (vf.v == 0 && (n < 0 || n > 10) && n % 10 == 0) {
+  if (vf.v != 0) {
     return PLURAL_CATEGORY.MANY;
   }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
   return PLURAL_CATEGORY.OTHER;
 }, function (n, precision) {
   var i = n | 0;
   var vf = getVF(n, precision);
-  var wt = getWT(vf.v, vf.f);
-
-  if (wt.t == 0 && i % 10 == 1 && i % 100 != 11 || wt.t != 0) {
+  if (n == 0 || n == 1 || i == 0 && vf.f == 1) {
     return PLURAL_CATEGORY.ONE;
   }
-
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  var i = n | 0;
+  var vf = getVF(n, precision);
+  if (i == 1 && vf.v == 0) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  if (vf.v != 0 || n == 0 || n != 1 && n % 100 >= 1 && n % 100 <= 19) {
+    return PLURAL_CATEGORY.FEW;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  var i = n | 0;
+  if (i >= 0 && i <= 1) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  var i = n | 0;
+  var vf = getVF(n, precision);
+  if (i == 1 && vf.v == 0) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  if (vf.v == 0 && i % 10 >= 2 && i % 10 <= 4 && (i % 100 < 12 || i % 100 > 14)) {
+    return PLURAL_CATEGORY.FEW;
+  }
+  if (vf.v == 0 && i != 1 && i % 10 >= 0 && i % 10 <= 1 || vf.v == 0 && i % 10 >= 5 && i % 10 <= 9 || vf.v == 0 && i % 100 >= 12 && i % 100 <= 14) {
+    return PLURAL_CATEGORY.MANY;
+  }
   return PLURAL_CATEGORY.OTHER;
 }, function (n, precision) {
   if (n >= 0 && n <= 1) {
     return PLURAL_CATEGORY.ONE;
   }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  var vf = getVF(n, precision);
-
-  if (n % 10 == 1 && (n % 100 < 11 || n % 100 > 19)) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  if (n % 10 >= 2 && n % 10 <= 9 && (n % 100 < 11 || n % 100 > 19)) {
-    return PLURAL_CATEGORY.FEW;
-  }
-
-  if (vf.f != 0) {
-    return PLURAL_CATEGORY.MANY;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  var vf = getVF(n, precision);
-
-  if (n % 10 == 0 || n % 100 >= 11 && n % 100 <= 19 || vf.v == 2 && vf.f % 100 >= 11 && vf.f % 100 <= 19) {
-    return PLURAL_CATEGORY.ZERO;
-  }
-
-  if (n % 10 == 1 && n % 100 != 11 || vf.v == 2 && vf.f % 10 == 1 && vf.f % 100 != 11 || vf.v != 2 && vf.f % 10 == 1) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  var i = n | 0;
-  var vf = getVF(n, precision);
-
-  if (vf.v == 0 && i % 10 == 1 || vf.f % 10 == 1) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  var i = n | 0;
-  var vf = getVF(n, precision);
-
-  if (i == 1 && vf.v == 0) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  if (vf.v != 0 || n == 0 || n != 1 && n % 100 >= 1 && n % 100 <= 19) {
-    return PLURAL_CATEGORY.FEW;
-  }
-
   return PLURAL_CATEGORY.OTHER;
 }, function (n, precision) {
   if (n == 1) {
     return PLURAL_CATEGORY.ONE;
   }
-
   if (n == 0 || n % 100 >= 2 && n % 100 <= 10) {
     return PLURAL_CATEGORY.FEW;
   }
-
   if (n % 100 >= 11 && n % 100 <= 19) {
     return PLURAL_CATEGORY.MANY;
   }
-
   return PLURAL_CATEGORY.OTHER;
 }, function (n, precision) {
   var i = n | 0;
   var vf = getVF(n, precision);
-
+  if (vf.v == 0 && i % 10 == 1 || vf.f % 10 == 1) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  var vf = getVF(n, precision);
+  if (n % 10 == 0 || n % 100 >= 11 && n % 100 <= 19 || vf.v == 2 && vf.f % 100 >= 11 && vf.f % 100 <= 19) {
+    return PLURAL_CATEGORY.ZERO;
+  }
+  if (n % 10 == 1 && n % 100 != 11 || vf.v == 2 && vf.f % 10 == 1 && vf.f % 100 != 11 || vf.v != 2 && vf.f % 10 == 1) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  var vf = getVF(n, precision);
+  if (n % 10 == 1 && (n % 100 < 11 || n % 100 > 19)) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  if (n % 10 >= 2 && n % 10 <= 9 && (n % 100 < 11 || n % 100 > 19)) {
+    return PLURAL_CATEGORY.FEW;
+  }
+  if (vf.f != 0) {
+    return PLURAL_CATEGORY.MANY;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  var i = n | 0;
+  var vf = getVF(n, precision);
   if (i == 1 && vf.v == 0) {
     return PLURAL_CATEGORY.ONE;
   }
-
-  if (vf.v == 0 && i % 10 >= 2 && i % 10 <= 4 && (i % 100 < 12 || i % 100 > 14)) {
-    return PLURAL_CATEGORY.FEW;
-  }
-
-  if (vf.v == 0 && i != 1 && i % 10 >= 0 && i % 10 <= 1 || vf.v == 0 && i % 10 >= 5 && i % 10 <= 9 || vf.v == 0 && i % 100 >= 12 && i % 100 <= 14) {
-    return PLURAL_CATEGORY.MANY;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  var i = n | 0;
-
-  if (i >= 0 && i <= 1) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  var i = n | 0;
-  var vf = getVF(n, precision);
-
-  if (vf.v == 0 && i % 10 == 1 && i % 100 != 11) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  if (vf.v == 0 && i % 10 >= 2 && i % 10 <= 4 && (i % 100 < 12 || i % 100 > 14)) {
-    return PLURAL_CATEGORY.FEW;
-  }
-
-  if (vf.v == 0 && i % 10 == 0 || vf.v == 0 && i % 10 >= 5 && i % 10 <= 9 || vf.v == 0 && i % 100 >= 11 && i % 100 <= 14) {
-    return PLURAL_CATEGORY.MANY;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  var i = n | 0;
-  var vf = getVF(n, precision);
-
-  if (n == 0 || n == 1 || i == 0 && vf.f == 1) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  return PLURAL_CATEGORY.OTHER;
-}, function (n, precision) {
-  var i = n | 0;
-  var vf = getVF(n, precision);
-
-  if (vf.v == 0 && i % 100 == 1) {
-    return PLURAL_CATEGORY.ONE;
-  }
-
-  if (vf.v == 0 && i % 100 == 2) {
+  if (i == 2 && vf.v == 0) {
     return PLURAL_CATEGORY.TWO;
   }
-
-  if (vf.v == 0 && i % 100 >= 3 && i % 100 <= 4 || vf.v != 0) {
+  if (vf.v == 0 && (n < 0 || n > 10) && n % 10 == 0) {
+    return PLURAL_CATEGORY.MANY;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  var i = n | 0;
+  var vf = getVF(n, precision);
+  var wt = getWT(vf.v, vf.f);
+  if (wt.t == 0 && i % 10 == 1 && i % 100 != 11 || wt.t != 0) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  var i = n | 0;
+  if (i == 0 || i == 1) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  if (n == 1) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  if (n == 2) {
+    return PLURAL_CATEGORY.TWO;
+  }
+  if (n >= 3 && n <= 6) {
     return PLURAL_CATEGORY.FEW;
   }
-
+  if (n >= 7 && n <= 10) {
+    return PLURAL_CATEGORY.MANY;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  var i = n | 0;
+  var vf = getVF(n, precision);
+  var wt = getWT(vf.v, vf.f);
+  if (n == 1 || wt.t != 0 && (i == 0 || i == 1)) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  if (n == 0) {
+    return PLURAL_CATEGORY.ZERO;
+  }
+  if (n == 1) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  if (n == 2) {
+    return PLURAL_CATEGORY.TWO;
+  }
+  if (n == 3) {
+    return PLURAL_CATEGORY.FEW;
+  }
+  if (n == 6) {
+    return PLURAL_CATEGORY.MANY;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  if (n % 10 == 1 && n % 100 != 11 && n % 100 != 71 && n % 100 != 91) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  if (n % 10 == 2 && n % 100 != 12 && n % 100 != 72 && n % 100 != 92) {
+    return PLURAL_CATEGORY.TWO;
+  }
+  if ((n % 10 >= 3 && n % 10 <= 4 || n % 10 == 9) && (n % 100 < 10 || n % 100 > 19) && (n % 100 < 70 || n % 100 > 79) && (n % 100 < 90 || n % 100 > 99)) {
+    return PLURAL_CATEGORY.FEW;
+  }
+  if (n != 0 && n % 1000000 == 0) {
+    return PLURAL_CATEGORY.MANY;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  if (n % 10 == 1 && n % 100 != 11) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) {
+    return PLURAL_CATEGORY.FEW;
+  }
+  if (n % 10 == 0 || n % 10 >= 5 && n % 10 <= 9 || n % 100 >= 11 && n % 100 <= 14) {
+    return PLURAL_CATEGORY.MANY;
+  }
+  return PLURAL_CATEGORY.OTHER;
+}, function (n, precision) {
+  if (n == 0) {
+    return PLURAL_CATEGORY.ZERO;
+  }
+  if (n == 1) {
+    return PLURAL_CATEGORY.ONE;
+  }
+  if (n == 2) {
+    return PLURAL_CATEGORY.TWO;
+  }
+  if (n % 100 >= 3 && n % 100 <= 10) {
+    return PLURAL_CATEGORY.FEW;
+  }
+  if (n % 100 >= 11 && n % 100 <= 99) {
+    return PLURAL_CATEGORY.MANY;
+  }
   return PLURAL_CATEGORY.OTHER;
 }]; // END RULES
 
@@ -748,31 +612,24 @@ PLURAL_LOCALES.map(function (locales, i) {
 });
 function plural (id, num, precision) {
   var match = id.match(/^\w+/i);
-
   if (match) {
     id = match[0];
   }
-
   if (!PLURAL_CACHE[id]) {
     id = 'en';
   }
-
   return PLURAL_CACHE[id](num, precision);
 }
-
 function getDecimals(n) {
   n = n + '';
   var i = n.indexOf('.');
   return i == -1 ? 0 : n.length - i - 1;
 }
-
 function getVF(n, precision) {
   var v = precision;
-
   if (undefined === v) {
     v = Math.min(getDecimals(n), 3);
   }
-
   var base = Math.pow(10, v);
   var f = (n * base | 0) % base;
   return {
@@ -785,47 +642,39 @@ function getVF(n, precision) {
  * Relative Date and time formatting.
  * Based on: https://github.com/twitter/twitter-cldr-js
  */
+
 var approximate_multiplier = 0.75,
-    default_type = "default",
-    time_in_seconds = {
-  "second": 1,
-  "minute": 60,
-  "hour": 3600,
-  "day": 86400,
-  "week": 604800,
-  "month": 2629743.83,
-  "year": 31556926
-};
+  default_type = "default",
+  time_in_seconds = {
+    "second": 1,
+    "minute": 60,
+    "hour": 3600,
+    "day": 86400,
+    "week": 604800,
+    "month": 2629743.83,
+    "year": 31556926
+  };
 function relativeDate (date, options) {
   date = date instanceof Date ? date : new Date(date);
-
   if (options && options.max && Math.abs((date - new Date()) / 1000) > options["max"]) {
     return formatDate.call(this, date);
   }
-
   return format((date - new Date()) / 1000, options, this.$locale.TIMESPAN_FORMATS, this.$locale.TIMESPAN_FORMATS.localeID || this.$locale.id);
 }
-
 function calculate_unit(seconds, unit_options) {
   var key, multiplier, obj, options;
-
   if (unit_options == null) {
     unit_options = {};
   }
-
   options = {};
-
   for (key in unit_options) {
     obj = unit_options[key];
     options[key] = obj;
   }
-
   if (options.approximate == null) {
     options["approximate"] = false;
   }
-
   multiplier = options.approximate ? approximate_multiplier : 1;
-
   if (seconds < time_in_seconds.minute * multiplier) {
     return "second";
   } else if (seconds < time_in_seconds.hour * multiplier) {
@@ -842,31 +691,23 @@ function calculate_unit(seconds, unit_options) {
     return "year";
   }
 }
-
 function calculate_time(seconds, unit) {
   return Math.round(seconds / time_in_seconds[unit]);
 }
-
 function format(seconds, fmt_options, patterns, locale) {
   var key, number, obj, options;
-
   if (fmt_options == null) {
     fmt_options = {};
   }
-
   options = {};
-
   for (key in fmt_options) {
     obj = fmt_options[key];
     options[key] = obj;
   }
-
   options["direction"] || (options["direction"] = seconds < 0 ? "ago" : "until");
-
   if (options["unit"] === null || options["unit"] === void 0) {
     options["unit"] = calculate_unit(Math.abs(seconds), options);
   }
-
   options["type"] || (options["type"] = default_type);
   options["number"] = calculate_time(Math.abs(seconds), options["unit"]);
   number = calculate_time(Math.abs(seconds), options["unit"]);
@@ -959,7 +800,66 @@ var DATETIME_FORMATS = {
 	mediumTime: "h:mm:ss a",
 	short: "M/d/yy h:mm a",
 	shortDate: "M/d/yy",
-	shortTime: "h:mm a"
+	shortTime: "h:mm a",
+	calendar: {
+		additional_formats: {
+			E: "ccc",
+			EHm: "E HH:mm",
+			EHms: "E HH:mm:ss",
+			Ed: "d E",
+			Ehm: "E h:mm a",
+			Ehms: "E h:mm:ss a",
+			Gy: "y G",
+			GyMMM: "MMM y G",
+			GyMMMEd: "E, MMM d, y G",
+			GyMMMd: "MMM d, y G",
+			H: "HH",
+			Hm: "HH:mm",
+			Hms: "HH:mm:ss",
+			M: "L",
+			MEd: "E, M/d",
+			MMM: "LLL",
+			MMMEd: "E, MMM d",
+			MMMd: "MMM d",
+			Md: "M/d",
+			d: "d",
+			h: "h a",
+			hm: "h:mm a",
+			hms: "h:mm:ss a",
+			ms: "mm:ss",
+			y: "y",
+			yM: "M/y",
+			yMEd: "E, M/d/y",
+			yMMM: "MMM y",
+			yMMMEd: "E, MMM d, y",
+			yMMMd: "MMM d, y",
+			yMd: "M/d/y",
+			yQQQ: "QQQ y",
+			yQQQQ: "QQQQ y"
+		},
+		fields: {
+			day: "Day",
+			"day-short": "day",
+			dayperiod: "AM/PM",
+			era: "Era",
+			hour: "Hour",
+			"hour-short": "hr.",
+			minute: "Minute",
+			"minute-short": "min.",
+			month: "Month",
+			"month-short": "mo.",
+			quarter: "Quarter",
+			"quarter-short": "qtr.",
+			second: "Second",
+			"second-short": "sec.",
+			week: "Week",
+			"week-short": "wk.",
+			weekday: "Day of the Week",
+			year: "Year",
+			"year-short": "yr.",
+			zone: "Time Zone"
+		}
+	}
 };
 var NUMBER_FORMATS = {
 	CURRENCY_SYM: "$",
@@ -1183,32 +1083,44 @@ var defaultLocale = {
  * Install plugin.
  */
 
-function plugin(Vue) {
-  var vue = Vue.prototype;
-
-  if (!vue.$locale) {
-    vue.$locale = defaultLocale;
+function plugin(app) {
+  if (app && app.version && app.version.split('.')[0] < 3) {
+    if (!app.prototype.$locale) {
+      app.prototype.$locale = defaultLocale;
+    }
+    app.prototype.$date = formatDate;
+    app.prototype.$number = formatNumber;
+    app.prototype.$currency = formatCurrency;
+    app.prototype.$relativeDate = relativeDate;
+    app.filter('date', (date, format, timezone) => app.prototype.$date(date, format, timezone));
+    app.filter('number', (number, fractionSize) => app.prototype.$number(number, fractionSize));
+    app.filter('currency', (amount, currencySymbol, fractionSize) => app.prototype.$currency(amount, currencySymbol, fractionSize));
+    app.filter('relativeDate', (date, options) => app.prototype.$relativeDate(date, options));
+  } else {
+    if (!app.config.globalProperties.$locale) {
+      app.config.globalProperties.$locale = defaultLocale;
+    }
+    const filters = {
+      date: formatDate.bind(app.config.globalProperties),
+      number: formatNumber.bind(app.config.globalProperties),
+      currency: formatCurrency.bind(app.config.globalProperties),
+      relativeDate: relativeDate.bind(app.config.globalProperties)
+    };
+    if (app.config.globalProperties.$filters && Object.keys(app.config.globalProperties.$filters).length) {
+      Object.assign(app.config.globalProperties.$filters, filters);
+    } else {
+      app.config.globalProperties.$filters = filters;
+    }
   }
-  vue.$date = formatDate;
-  vue.$number = formatNumber;
-  vue.$currency = formatCurrency;
-  vue.$relativeDate = relativeDate;
-  Vue.filter('date', function (date, format, timezone) {
-    return vue.$date(date, format, timezone);
-  });
-  Vue.filter('number', function (number, fractionSize) {
-    return vue.$number(number, fractionSize);
-  });
-  Vue.filter('currency', function (amount, currencySymbol, fractionSize) {
-    return vue.$currency(amount, currencySymbol, fractionSize);
-  });
-  Vue.filter('relativeDate', function (date, options) {
-    return vue.$relativeDate(date, options);
-  });
 }
-
-if (typeof window !== 'undefined' && window.Vue) {
-  window.Vue.use(plugin);
+if (typeof exports === 'object') {
+  module.exports = plugin;
+} else if (typeof define === 'function' && define.amd) {
+  define([], function () {
+    return plugin;
+  });
+} else if (typeof window !== 'undefined' && window.Vue && window.Vue.use) {
+  Vue.use(plugin);
 }
 
 module.exports = plugin;

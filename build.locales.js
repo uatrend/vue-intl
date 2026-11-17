@@ -59,8 +59,13 @@ global.angular = {
         });
 
         if (file) {
-            value.TIMESPAN_FORMATS = (require(file).TimespanFormatter).patterns;
+            var twitterLocales = require(file);
+            value.TIMESPAN_FORMATS = twitterLocales.TimespanFormatter.patterns;
             value.TIMESPAN_FORMATS.localeID = id;
+            value.DATETIME_FORMATS.calendar = {
+                additional_formats: twitterLocales.Calendar.calendar.additional_formats,
+                fields: twitterLocales.Calendar.calendar.fields
+            }
         }
 
         file = output + value.id + '.json';
